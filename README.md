@@ -1,1 +1,2 @@
-# planter
+# planter 🌼
+> Smart flower cup 
