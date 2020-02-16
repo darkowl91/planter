@@ -1,5 +1,5 @@
 /*
- CI Build Traffic Light Controller based on LoLin new NodeMcu v3(ESP-12E) board
+ Smart Flower Controller based on LoLin new NodeMcu v3(ESP-12E) board
  Board Manager: http://arduino.esp8266.com/stable/package_esp8266com_index.json
  Upload speed: 115200
  CPU frequency: 80MHz
@@ -52,4 +52,38 @@ void setup()
 
 void loop()
 {
+  display.clear();
+
+  byte t = 0, h = 0;
+  readDHT(&t, &h);
+
+  display.drawString(0, 20, "Temperature: " + String((int)t));
+  display.drawString(0, 30, "Humidity: " + String((int)h));
+
+  display.display();
+  delay(10);
+}
+
+int readDHT(byte *temperature, byte *humidity)
+{
+  Serial.println("Read DHT11...");
+
+  int result = SimpleDHTErrSuccess;
+  if ((result = dht11.read(temperature, humidity, NULL)) != SimpleDHTErrSuccess)
+  {
+    Serial.print("Error read dht: ");
+    Serial.println(result);
+    delay(1000);
+    return result;
+  }
+
+  Serial.print("DHT11: ");
+  Serial.print((int)*temperature);
+  Serial.print(" C, ");
+  Serial.print((int)*humidity);
+  Serial.println(" H");
+
+  // DHT11 sampling rate is 1HZ.
+  delay(1500);
+  return result;
 }
