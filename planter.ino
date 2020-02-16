@@ -5,11 +5,11 @@
  CPU frequency: 80MHz
 
  PINS:
+ * A0 - Soil moisture sensor
  * D1 - SDA
  * D2 - SLC
- * D3 - DHT data
- * D4 - Soil moisture sensor
  * D5 - LED
+ * D6 - DHT data
  */
 
 #include <ESP8266WiFi.h>
@@ -20,11 +20,11 @@
 #include "Images.h"
 
 // PIN
-const int ledPin = 14; // D5
-const int dhtPin = 0;  // D3
+const int moiPin = 0;  // A0
 const int sdaPin = 5;  // D1
 const int sclPin = 4;  // D2
-const int moiPin = 2;  // D4
+const int ledPin = 14; // D5
+const int dhtPin = 12; // D6
 
 // WIFI
 char ssid[] = SSID;
@@ -40,7 +40,7 @@ void setup()
 {
   Serial.begin(115200);
   delay(10);
-  Serial.println("\nStart excecuting setup");
+  Serial.println("\nStart excecuting setup...");
   // set ledPin mode
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
@@ -57,8 +57,11 @@ void loop()
   byte t = 0, h = 0;
   readDHT(&t, &h);
 
-  display.drawString(0, 20, "Temperature: " + String((int)t));
-  display.drawString(0, 30, "Humidity: " + String((int)h));
+  display.drawString(0, 15, "Temperature: " + String((int)t));
+  display.drawString(0, 25, "Humidity: " + String((int)h));
+
+  int moi = readMoisture();
+  display.drawString(0, 35, "Moisture: " + String(moi));
 
   display.display();
   delay(10);
@@ -66,18 +69,17 @@ void loop()
 
 int readDHT(byte *temperature, byte *humidity)
 {
-  Serial.println("Read DHT11...");
+  Serial.print("\nRead DHT11: ");
 
   int result = SimpleDHTErrSuccess;
   if ((result = dht11.read(temperature, humidity, NULL)) != SimpleDHTErrSuccess)
   {
-    Serial.print("Error read dht: ");
+    Serial.print("Error read dht ");
     Serial.println(result);
     delay(1000);
     return result;
   }
 
-  Serial.print("DHT11: ");
   Serial.print((int)*temperature);
   Serial.print(" C, ");
   Serial.print((int)*humidity);
@@ -86,4 +88,13 @@ int readDHT(byte *temperature, byte *humidity)
   // DHT11 sampling rate is 1HZ.
   delay(1500);
   return result;
+}
+
+int readMoisture()
+{
+  Serial.print("\nRead Moisture: ");
+  int moi = analogRead(moiPin);
+  Serial.println(moi);
+
+  return moi;
 }
