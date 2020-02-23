@@ -9,7 +9,8 @@
  * D1 - SDA
  * D2 - SLC
  * D5 - LED
- * D6 - DHT data
+ * D6 - Touch btn
+ * D7 - DHT data
  */
 
 #include <ESP8266WiFi.h>
@@ -24,7 +25,8 @@ const int moiPin = 0;  // A0
 const int sdaPin = 5;  // D1
 const int sclPin = 4;  // D2
 const int ledPin = 14; // D5
-const int dhtPin = 12; // D6
+const int bntPin = 12; // D6
+const int dhtPin = 13; // D7
 
 // WIFI
 char ssid[] = SSID;
@@ -65,6 +67,13 @@ void loop()
 
   display.display();
   delay(10);
+
+  blink();
+
+  if (digitalRead(bntPin) == 1)
+  {
+    Serial.println("\nTouch");
+  }
 }
 
 int readDHT(byte *temperature, byte *humidity)
@@ -97,4 +106,11 @@ int readMoisture()
   Serial.println(moi);
 
   return moi;
+}
+
+void blink()
+{
+  digitalWrite(ledPin, HIGH);
+  delay(300);
+  digitalWrite(ledPin, LOW);
 }
