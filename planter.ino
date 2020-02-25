@@ -38,6 +38,14 @@ SimpleDHT11 dht11(dhtPin);
 // OLED Display
 SSD1306Wire display(0x3c, sdaPin, sclPin);
 
+int t; // temperature
+int h; // humidity
+int m; // soil moisture
+
+// sensors intervals
+long lastTimeSensorUpdate = 0;
+int updateInterval = 3600000; // 1h
+
 void setup()
 {
   Serial.begin(115200);
@@ -45,7 +53,7 @@ void setup()
   Serial.println("\nStart excecuting setup...");
   // set ledPin mode
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin, HIGH);
   // set display
   display.init();
   display.setFont(ArialMT_Plain_10);
@@ -56,61 +64,36 @@ void loop()
 {
   display.clear();
 
-  byte t = 0, h = 0;
-  readDHT(&t, &h);
+  updateSensors();
 
-  display.drawString(0, 15, "Temperature: " + String((int)t));
-  display.drawString(0, 25, "Humidity: " + String((int)h));
-
-  int moi = readMoisture();
-  display.drawString(0, 35, "Moisture: " + String(moi));
-
+  drawValues();
   display.display();
+
   delay(10);
+}
 
-  blink();
+void drawValues()
+{
+  display.drawString(0, 15, "Temperature: " + String(t));
+  display.drawString(0, 25, "Humidity: " + String(h));
+  display.drawString(0, 35, "Moisture: " + String(m));
+}
 
-  if (digitalRead(bntPin) == 1)
+void updateSensors()
+{
+  if ((millis() > lastTimeSensorUpdate + updateInterval) || lastTimeSensorUpdate == 0)
   {
-    Serial.println("\nTouch");
+    byte temperature = 0;
+    byte humidity = 0;
+    int err = SimpleDHTErrSuccess;
+    if ((err = dht11.read(&temperature, &humidity, NULL)) == SimpleDHTErrSuccess)
+    {
+      t = (int)temperature;
+      h = (int)humidity;
+    }
+
+    m = analogRead(moiPin);
+
+    lastTimeSensorUpdate = millis();
   }
-}
-
-int readDHT(byte *temperature, byte *humidity)
-{
-  Serial.print("\nRead DHT11: ");
-
-  int result = SimpleDHTErrSuccess;
-  if ((result = dht11.read(temperature, humidity, NULL)) != SimpleDHTErrSuccess)
-  {
-    Serial.print("Error read dht ");
-    Serial.println(result);
-    delay(1000);
-    return result;
-  }
-
-  Serial.print((int)*temperature);
-  Serial.print(" C, ");
-  Serial.print((int)*humidity);
-  Serial.println(" H");
-
-  // DHT11 sampling rate is 1HZ.
-  delay(1500);
-  return result;
-}
-
-int readMoisture()
-{
-  Serial.print("\nRead Moisture: ");
-  int moi = analogRead(moiPin);
-  Serial.println(moi);
-
-  return moi;
-}
-
-void blink()
-{
-  digitalWrite(ledPin, HIGH);
-  delay(300);
-  digitalWrite(ledPin, LOW);
 }

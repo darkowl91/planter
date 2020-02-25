@@ -3,10 +3,12 @@
     {
       "name": "Mac",
       "includePath": [
-        "/Users/owl/Projects/ci-light/lib/**",
+        "${workspaceRoot}",
         "/Users/owl/Library/Arduino15/packages/esp8266/hardware/esp8266/2.6.3/**",
         "/Users/owl/Library/Arduino15/packages/esp8266/tools/**",
-        "/Users/owl/Documents/Arduino/libraries/**"
+        "/Users/owl/Documents/Arduino/tools/**",
+        "/Users/owl/Documents/Arduino/libraries/**",
+        "/Users/owl/Projects/planter/lib/**"
       ],
       "forcedInclude": [],
       "macFrameworkPath": [
