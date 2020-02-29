@@ -47,7 +47,7 @@ auto timer = timer_create_default();
 
 // button state
 int btnState = LOW;
-int btnPressTime = -1;
+long btnPressTime = -1;
 
 // display frames
 typedef void (*Frame)(void);
@@ -93,6 +93,29 @@ void loop()
 {
   timer.tick();
 
+  bool isNextFrame = isBtnPressed();
+  displayFrame(isNextFrame);
+}
+
+void displayFrame(bool isNextFrame)
+{
+  if (isNextFrame)
+  {
+    if (frameNum < frameSize - 1)
+    {
+      frameNum++;
+    }
+    else
+    {
+      frameNum = 0;
+    }
+
+    Serial.println("Display frame: " + String(frameNum) + "from: " + String(frameSize));
+
+    display.clear();
+    frames[frameNum]();
+    display.display();
+  }
 }
 
 bool isBtnPressed()
