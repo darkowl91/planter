@@ -52,49 +52,51 @@ long btnPressTime = -1;
 // display frames
 typedef void (*Frame)(void);
 
-void drawTemperature()
+void drawTitle(String title)
 {
   display.setFont(ArialMT_Plain_10);
-  display.drawString(30, 0, "Temperature");
+  display.drawString(0, 0, title);
+  display.drawXbm(110, 0, img_wifi_on_width, img_wifi_on_height, img_wifi_on_bits);
+}
+
+void drawTemperature()
+{
+  drawTitle("Temperature");
 
   int x = 15;
+  int y = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(x + 15, 18, String(t));
-
+  display.drawString(x + 15, y + 18, String(t));
   display.setFont(ArialMT_Plain_10);
-  display.drawString(x + 40, 18, "O");
-
+  display.drawString(x + 40, y + 18, "O");
   display.setFont(ArialMT_Plain_16);
-  display.drawString(x + 50, 25, "C");
-
-  display.drawXbm(x + 70, 18, img_temp_width, img_temp_height, img_temp_bits);
+  display.drawString(x + 50, y + 25, "C");
+  display.drawXbm(x + 70, y + 18, img_temp_width, img_temp_height, img_temp_bits);
 }
 
 void drawHumidity()
 {
-  display.setFont(ArialMT_Plain_10);
-  display.drawString(35, 0, "Humidity");
+  drawTitle("Humidity");
 
   int x = 15;
+  int y = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(x + 15, 18, String(h));
+  display.drawString(x + 15, y + 18, String(h));
 
   display.setFont(ArialMT_Plain_16);
-  display.drawString(x + 45, 25, "%");
-
-  display.drawXbm(x + 60, 18, img_hum_width, img_hum_height, img_hum_bits);
+  display.drawString(x + 45, y + 25, "%");
+  display.drawXbm(x + 70, y + 18, img_hum_width, img_hum_height, img_hum_bits);
 }
 
 void drawSoilMoisture()
 {
-  display.setFont(ArialMT_Plain_10);
-  display.drawString(44, 0, "Soil");
+  drawTitle("Soil");
 
   int x = 15;
+  int y = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(x + 15, 18, String(m));
-
-  display.drawXbm(x + 60, 18, img_soil_width, img_soil_height, img_soil_bits);
+  display.drawString(x + 15, y + 18, String(m));
+  display.drawXbm(x + 70, y + 18, img_soil_width, img_soil_height, img_soil_bits);
 }
 
 Frame frames[] = {drawTemperature, drawHumidity, drawSoilMoisture};
