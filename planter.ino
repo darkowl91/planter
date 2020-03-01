@@ -90,8 +90,11 @@ void drawSoilMoisture()
   display.setFont(ArialMT_Plain_10);
   display.drawString(44, 0, "Soil");
 
+  int x = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(15, 18, String(m));
+  display.drawString(x + 15, 18, String(m));
+
+  display.drawXbm(x + 60, 18, img_soil_width, img_soil_height, img_soil_bits);
 }
 
 Frame frames[] = {drawTemperature, drawHumidity, drawSoilMoisture};
