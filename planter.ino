@@ -54,17 +54,44 @@ typedef void (*Frame)(void);
 
 void drawTemperature()
 {
-  display.drawString(0, 0, "Temperature");
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(30, 0, "Temperature");
+
+  int x = 15;
+  display.setFont(ArialMT_Plain_24);
+  display.drawString(x + 15, 18, String(t));
+
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(x + 40, 18, "O");
+
+  display.setFont(ArialMT_Plain_16);
+  display.drawString(x + 50, 25, "C");
+
+  display.drawXbm(x + 70, 18, img_temp_width, img_temp_height, img_temp_bits);
 }
 
 void drawHumidity()
 {
-  display.drawString(0, 0, "Humidity");
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(35, 0, "Humidity");
+
+  int x = 15;
+  display.setFont(ArialMT_Plain_24);
+  display.drawString(x + 15, 18, String(h));
+
+  display.setFont(ArialMT_Plain_16);
+  display.drawString(x + 45, 25, "%");
+
+  display.drawXbm(x + 60, 18, img_hum_width, img_hum_height, img_hum_bits);
 }
 
 void drawSoilMoisture()
 {
-  display.drawString(0, 0, "Soil moisture");
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(44, 0, "Soil");
+
+  display.setFont(ArialMT_Plain_24);
+  display.drawString(15, 18, String(m));
 }
 
 Frame frames[] = {drawTemperature, drawHumidity, drawSoilMoisture};
