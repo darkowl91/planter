@@ -56,7 +56,14 @@ void drawTitle(String title)
 {
   display.setFont(ArialMT_Plain_10);
   display.drawString(0, 0, title);
-  display.drawXbm(110, 0, img_wifi_on_width, img_wifi_on_height, img_wifi_on_bits);
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    display.drawXbm(110, 0, img_wifi_on_width, img_wifi_on_height, img_wifi_on_bits);
+  }
+  else
+  {
+    display.drawXbm(110, 0, img_wifi_off_width, img_wifi_off_height, img_wifi_off_bits);
+  }
 }
 
 void drawTemperature()
@@ -108,6 +115,9 @@ void setup()
   Serial.begin(115200);
   delay(10);
   Serial.println("\nStart excecuting setup...");
+  Serial.print("MAC: ");
+  Serial.println(WiFi.macAddress());
+
   // set ledPin mode
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, HIGH);
@@ -119,6 +129,9 @@ void setup()
 
   // setup timer
   timer.every(3600, updateSensors);
+
+  // setup wifi connection
+  connectWiFiAP();
 }
 
 void loop()
@@ -182,5 +195,36 @@ bool updateSensors(void *)
   m = analogRead(moiPin);
 
   Serial.println("Update sensors -> t: " + String(t) + " h: " + String(h) + " m: " + String(m));
+  return true;
+}
+
+void connectWiFiAP()
+{
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  int attempts = 0;
+
+  while (WiFi.status() != WL_CONNECTED && attempts < 20)
+  {
+    digitalWrite(ledPin, LOW);
+    delay(50);
+    digitalWrite(ledPin, HIGH);
+    attempts++;
+  }
+
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print("Could not connect to: ");
+    Serial.println(ssid);
+    return;
+  }
+
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+bool blink(void *)
+{
+  digitalWrite(ledPin, !digitalRead(ledPin));
   return true;
 }
