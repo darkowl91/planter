@@ -12,6 +12,7 @@
  * D7 - DHT data
  */
 
+#include <FirebaseESP8266.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <SimpleDHT.h>
@@ -41,6 +42,11 @@ SSD1306Wire display(0x3c, sdaPin, sclPin);
 int t; // temperature
 int h; // humidity
 int m; // soil moisture
+
+//Firebase
+FirebaseData firebaseData;
+char firbaseAuth[] = FIREBASE_AUTH;
+char firbaseHost[] = FIREBASE_HOST;
 
 // sensors update timer
 auto timer = timer_create_default();
@@ -132,6 +138,9 @@ void setup()
 
   // setup wifi connection
   connectWiFiAP();
+
+  // setup firebase connection
+  connectFirebase();
 }
 
 void loop()
@@ -155,7 +164,7 @@ void displayFrame(bool isNextFrame)
       frameNum = 0;
     }
 
-    Serial.println("Display frame: " + String(frameNum) + "from: " + String(frameSize));
+    Serial.println("Display frame: " + String(frameNum) + " from: " + String(frameSize));
 
     display.clear();
     frames[frameNum]();
@@ -195,6 +204,11 @@ bool updateSensors(void *)
   m = analogRead(moiPin);
 
   Serial.println("Update sensors -> t: " + String(t) + " h: " + String(h) + " m: " + String(m));
+
+  Firebase.set(firebaseData, "planters/planter-1/temperature", t);
+  Firebase.set(firebaseData, "planters/planter-1/humidity", h);
+  Firebase.set(firebaseData, "planters/planter-1/soil-moisture", m);
+
   return true;
 }
 
@@ -207,7 +221,7 @@ void connectWiFiAP()
   while (WiFi.status() != WL_CONNECTED && attempts < 20)
   {
     digitalWrite(ledPin, LOW);
-    delay(50);
+    delay(100);
     digitalWrite(ledPin, HIGH);
     attempts++;
   }
@@ -221,6 +235,17 @@ void connectWiFiAP()
 
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+}
+
+void connectFirebase()
+{
+  Firebase.begin(firbaseHost, firbaseAuth);
+  Firebase.reconnectWiFi(true);
+  if (!Firebase.beginStream(firebaseData, "planters/planter-1"))
+  {
+    Serial.println("Could not begin stream");
+    Serial.println("REASON: " + firebaseData.errorReason());
+  }
 }
 
 bool blink(void *)
