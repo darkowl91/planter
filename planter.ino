@@ -39,6 +39,9 @@ SimpleDHT11 dht11(dhtPin);
 // OLED Display
 SSD1306Wire display(0x3c, sdaPin, sclPin);
 
+// updates timer: sensors refersh, push data to firebae
+Timer<2, millis> timer;
+
 int t; // temperature
 int h; // humidity
 int m; // soil moisture
@@ -47,9 +50,6 @@ int m; // soil moisture
 FirebaseData firebaseData;
 char firbaseAuth[] = FIREBASE_AUTH;
 char firbaseHost[] = FIREBASE_HOST;
-
-// updates timer: sensors refersh, push data
-Timer<2, millis> timer;
 
 // button state
 int btnState = LOW;
@@ -152,28 +152,32 @@ void loop()
   timer.tick();
 
   bool isNextFrame = isBtnPressed();
-  displayFrame(isNextFrame);
-}
 
-void displayFrame(bool isNextFrame)
-{
   if (isNextFrame)
   {
-    if (frameNum < frameSize - 1)
-    {
-      frameNum++;
-    }
-    else
-    {
-      frameNum = 0;
-    }
-
-    Serial.println("Display frame: " + String(frameNum) + " from: " + String(frameSize));
-
-    display.clear();
-    frames[frameNum]();
-    display.display();
+    updateFrameNum();
+    displayFrame();
   }
+}
+
+void updateFrameNum()
+{
+  if (frameNum < frameSize - 1)
+  {
+    frameNum++;
+  }
+  else
+  {
+    frameNum = 0;
+  }
+  Serial.println("Update frame -> " + String(frameNum) + " from: " + String(frameSize));
+}
+
+void displayFrame()
+{
+  display.clear();
+  frames[frameNum]();
+  display.display();
 }
 
 bool isBtnPressed()
