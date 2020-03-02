@@ -48,8 +48,8 @@ FirebaseData firebaseData;
 char firbaseAuth[] = FIREBASE_AUTH;
 char firbaseHost[] = FIREBASE_HOST;
 
-// sensors update timer
-auto timer = timer_create_default();
+// updates timer: sensors refersh, push data
+Timer<2, millis> timer;
 
 // button state
 int btnState = LOW;
@@ -128,19 +128,23 @@ void setup()
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, HIGH);
   pinMode(btnPin, INPUT);
+
   // set display
   display.init();
   display.setFont(ArialMT_Plain_10);
   display.flipScreenVertically();
 
-  // setup timer
-  timer.every(3600, updateSensors);
+  // sensors update timer every 3s
+  timer.every(3000, updateSensors);
 
-  // setup wifi connection
+  // wifi connection
   connectWiFiAP();
 
-  // setup firebase connection
+  // firebase connection
   connectFirebase();
+
+  // firebase udpdate interval 1h
+  timer.every(360000, udpateFirebaseData);
 }
 
 void loop()
@@ -205,10 +209,6 @@ bool updateSensors(void *)
 
   Serial.println("Update sensors -> t: " + String(t) + " h: " + String(h) + " m: " + String(m));
 
-  Firebase.set(firebaseData, "planters/planter-1/temperature", t);
-  Firebase.set(firebaseData, "planters/planter-1/humidity", h);
-  Firebase.set(firebaseData, "planters/planter-1/soil-moisture", m);
-
   return true;
 }
 
@@ -218,10 +218,10 @@ void connectWiFiAP()
   WiFi.begin(ssid, password);
   int attempts = 0;
 
-  while (WiFi.status() != WL_CONNECTED && attempts < 20)
+  while (WiFi.status() != WL_CONNECTED && attempts < 10)
   {
     digitalWrite(ledPin, LOW);
-    delay(100);
+    delay(500);
     digitalWrite(ledPin, HIGH);
     attempts++;
   }
@@ -246,6 +246,18 @@ void connectFirebase()
     Serial.println("Could not begin stream");
     Serial.println("REASON: " + firebaseData.errorReason());
   }
+}
+
+bool udpateFirebaseData(void *)
+{
+  if (WiFi.status() == WL_CONNECTED)
+  {
+    Firebase.set(firebaseData, "planters/planter-1/temperature", t);
+    Firebase.set(firebaseData, "planters/planter-1/humidity", h);
+    Firebase.set(firebaseData, "planters/planter-1/soil-moisture", m);
+  }
+
+  return true;
 }
 
 bool blink(void *)
