@@ -39,6 +39,12 @@ SimpleDHT11 dht11(dhtPin);
 // OLED Display
 SSD1306Wire display(0x3c, sdaPin, sclPin);
 
+// display idle timout: 2min
+long displayIdleTime = 120000;
+
+// display last time active
+long displayLastUpdate = -1;
+
 // updates timer: sensors refersh, push data to firebae
 Timer<2, millis> timer;
 
@@ -156,7 +162,6 @@ void loop()
   if (isNextFrame)
   {
     updateFrameNum();
-    displayFrame();
   }
 }
 
@@ -170,14 +175,10 @@ void updateFrameNum()
   {
     frameNum = 0;
   }
-  Serial.println("Update frame -> " + String(frameNum) + " from: " + String(frameSize));
-}
 
-void displayFrame()
-{
-  display.clear();
-  frames[frameNum]();
-  display.display();
+  Serial.println("Update frame -> " + String(frameNum) + " from: " + String(frameSize));
+
+  redraw(true);
 }
 
 bool isBtnPressed()
@@ -198,6 +199,27 @@ bool isBtnPressed()
   return isPressed;
 }
 
+void redraw(bool resetLastUpdateTime)
+{
+  if (resetLastUpdateTime)
+  {
+    displayLastUpdate = millis();
+  }
+
+  if (millis() - displayLastUpdate < displayIdleTime)
+  {
+    display.displayOn();
+    display.clear();
+    frames[frameNum]();
+    display.display();
+  }
+  else
+  {
+    display.clear();
+    display.displayOff();
+  }
+}
+
 bool updateSensors(void *)
 {
   byte temperature = 0;
@@ -212,6 +234,8 @@ bool updateSensors(void *)
   m = analogRead(moiPin);
 
   Serial.println("Update sensors -> t: " + String(t) + " h: " + String(h) + " m: " + String(m));
+
+  redraw(false);
 
   return true;
 }
