@@ -48,9 +48,11 @@ long displayLastUpdate = -1;
 // updates timer: sensors refersh, push data to firebae
 Timer<2, millis> timer;
 
-int t; // temperature
-int h; // humidity
-int m; // soil moisture
+int t;             // temperature
+int h;             // humidity
+int m;             // soil moisture
+int m_air = 625;   // air value for soil
+int m_water = 197; // water value for soil
 
 //Firebase
 FirebaseData firebaseData;
