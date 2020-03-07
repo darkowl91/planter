@@ -251,8 +251,9 @@ void connectWiFiAP()
   while (WiFi.status() != WL_CONNECTED && attempts < 10)
   {
     digitalWrite(ledPin, LOW);
-    delay(500);
+    delay(250);
     digitalWrite(ledPin, HIGH);
+    delay(250);
     attempts++;
   }
 
