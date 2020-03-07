@@ -18,6 +18,7 @@
 #include <SimpleDHT.h>
 #include <SSD1306.h>
 #include <timer.h>
+#include <NTPClient.h>
 #include "Secrets.h"
 #include "Images.h"
 
@@ -63,6 +64,10 @@ char firbaseHost[] = FIREBASE_HOST;
 int btnState = LOW;
 long btnPressTime = -1;
 
+// NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+
 // display frames
 typedef void (*Frame)(void);
 
@@ -72,6 +77,7 @@ void drawTitle(String title)
   display.drawString(0, 0, title);
   if (WiFi.status() == WL_CONNECTED)
   {
+    display.drawString(80, 0 String(timeClient.getHours()) + ":" + String(timeClient.getMinutes()));
     display.drawXbm(110, 0, img_wifi_on_width, img_wifi_on_height, img_wifi_on_bits);
   }
   else
@@ -153,11 +159,15 @@ void setup()
 
   // firebase udpdate interval 1h
   timer.every(360000, udpateFirebaseData);
+
+  // retrive time
+  timeClient.begin();
 }
 
 void loop()
 {
   timer.tick();
+  timeClient.update();
 
   bool isNextFrame = isBtnPressed();
 
