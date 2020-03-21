@@ -18,6 +18,7 @@
 #include <SimpleDHT.h>
 #include <SSD1306.h>
 #include <timer.h>
+#include <WiFiUdp.h>
 #include <NTPClient.h>
 #include "Secrets.h"
 #include "Images.h"
@@ -66,7 +67,7 @@ long btnPressTime = -1;
 
 // NTP Client to get time
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "by.pool.ntp.org", 3600, 60000);
+NTPClient timeClient(ntpUDP, "by.pool.ntp.org", 10800, 60000); // GTM+3
 
 // display frames
 typedef void (*Frame)(void);
@@ -77,7 +78,7 @@ void drawTitle(String title)
   display.drawString(0, 0, title);
   if (WiFi.status() == WL_CONNECTED)
   {
-    display.drawString(80, 0 String(timeClient.getHours()) + ":" + String(timeClient.getMinutes()));
+    display.drawString(70, 0, timeClient.getFormattedTime());
     display.drawXbm(110, 0, img_wifi_on_width, img_wifi_on_height, img_wifi_on_bits);
   }
   else
