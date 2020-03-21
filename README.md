@@ -1,6 +1,8 @@
 # planter 🌼
 > Smart flower cup
 
+![planter](assets/planter-smart-pot.PNG)
+
 ## Install
 + [esp8266-oled-ssd1306](https://github.com/ThingPulse/esp8266-oled-ssd1306)
 + [Firebase-ESP8266](https://github.com/mobizt/Firebase-ESP8266)
