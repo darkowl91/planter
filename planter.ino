@@ -66,7 +66,7 @@ long btnPressTime = -1;
 
 // NTP Client to get time
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
+NTPClient timeClient(ntpUDP, "by.pool.ntp.org", 3600, 60000);
 
 // display frames
 typedef void (*Frame)(void);
