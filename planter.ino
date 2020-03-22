@@ -150,7 +150,9 @@ void setup()
   display.flipScreenVertically();
 
   // sensors update timer every 3s
-  timer.every(3000, updateSensors);
+  const int sensorsUpdateInterval = 3000;
+
+  timer.every(sensorsUpdateInterval, updateSensors);
 
   // wifi connection
   connectWiFiAP();
@@ -159,7 +161,9 @@ void setup()
   connectFirebase();
 
   // firebase udpdate interval 1h
-  timer.every(360000, udpateFirebaseData);
+  const int firebaseUpdateInterval = 360000;
+
+  timer.every(firebaseUpdateInterval, udpateFirebaseData);
 
   // retrive time
   timeClient.begin();
@@ -294,9 +298,9 @@ bool udpateFirebaseData(void *)
 {
   if (WiFi.status() == WL_CONNECTED)
   {
-    Firebase.set(firebaseData, "planters/planter-1/temperature", t);
-    Firebase.set(firebaseData, "planters/planter-1/humidity", h);
-    Firebase.set(firebaseData, "planters/planter-1/soil-moisture", m);
+    Firebase.pushInt(firebaseData, "planters/planter-1/temperature", t);
+    Firebase.pushInt(firebaseData, "planters/planter-1/humidity", h);
+    Firebase.pushInt(firebaseData, "planters/planter-1/soil-moisture", m);
   }
 
   return true;
