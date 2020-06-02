@@ -13,6 +13,7 @@
  */
 
 #include <FirebaseESP8266.h>
+#include "FirebaseJson.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <SimpleDHT.h>
@@ -58,6 +59,7 @@ int m_water = 197; // water value for soil
 
 //Firebase
 FirebaseData firebaseData;
+char planterPath[] = PLANTER_PATH;
 char firbaseAuth[] = FIREBASE_AUTH;
 char firbaseHost[] = FIREBASE_HOST;
 
@@ -287,10 +289,9 @@ void connectFirebase()
 {
   Firebase.begin(firbaseHost, firbaseAuth);
   Firebase.reconnectWiFi(true);
-  if (!Firebase.beginStream(firebaseData, "planters/planter-1"))
+  if (!Firebase.beginStream(firebaseData, planterPath))
   {
-    Serial.println("Could not begin stream");
-    Serial.println("REASON: " + firebaseData.errorReason());
+    Serial.println("Error Firebase: " + firebaseData.errorReason());
   }
 }
 
@@ -298,9 +299,16 @@ bool udpateFirebaseData(void *)
 {
   if (WiFi.status() == WL_CONNECTED)
   {
-    Firebase.pushInt(firebaseData, "planters/planter-1/temperature", t);
-    Firebase.pushInt(firebaseData, "planters/planter-1/humidity", h);
-    Firebase.pushInt(firebaseData, "planters/planter-1/soil-moisture", m);
+    FirebaseJson updateData;
+    updateData.set("temperature", t);
+    updateData.set("humidity", h);
+    updateData.set("moisture", m);
+    updateData.set("timestamp", timeClient.getEpochTime());
+
+    if (!Firebase.push(firebaseData, planterPath, updateData))
+    {
+      Serial.println("Error Firebase: " + firebaseData.errorReason());
+    }
   }
 
   return true;
