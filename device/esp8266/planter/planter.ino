@@ -12,8 +12,8 @@
  * D7 - DHT data
  */
 
-#include <FirebaseESP8266.h>
-#include "FirebaseJson.h"
+#include <Arduino.h>
+#include "FirebaseESP8266.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <SimpleDHT.h>
@@ -59,6 +59,7 @@ int m_water = 197; // water value for soil
 
 //Firebase
 FirebaseData firebaseData;
+FirebaseJson firebaseJSON;
 char planterPath[] = PLANTER_PATH;
 char firbaseAuth[] = FIREBASE_AUTH;
 char firbaseHost[] = FIREBASE_HOST;
@@ -163,6 +164,7 @@ void setup()
   connectFirebase();
 
   // firebase udpdate interval 1h
+
   const int firebaseUpdateInterval = 360000;
 
   timer.every(firebaseUpdateInterval, udpateFirebaseData);
@@ -299,13 +301,10 @@ bool udpateFirebaseData(void *)
 {
   if (WiFi.status() == WL_CONNECTED)
   {
-    FirebaseJson updateData;
-    updateData.set("temperature", t);
-    updateData.set("humidity", h);
-    updateData.set("moisture", m);
-    updateData.set("timestamp", timeClient.getEpochTime());
+    firebaseJSON.clear().add("temperature", t).add("humidity", h).add("moisture", m);
 
-    if (!Firebase.push(firebaseData, planterPath, updateData))
+
+    if (!Firebase.setJSON(firebaseData, planterPath, firebaseJSON))
     {
       Serial.println("Error Firebase: " + firebaseData.errorReason());
     }
