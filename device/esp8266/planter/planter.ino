@@ -13,7 +13,7 @@
  */
 
 #include <Arduino.h>
-#include "FirebaseESP8266.h"
+#include <FirebaseESP8266.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
 #include <SimpleDHT.h>
@@ -164,7 +164,6 @@ void setup()
   connectFirebase();
 
   // firebase udpdate interval 1h
-
   const int firebaseUpdateInterval = 360000;
 
   timer.every(firebaseUpdateInterval, udpateFirebaseData);
@@ -301,10 +300,15 @@ bool udpateFirebaseData(void *)
 {
   if (WiFi.status() == WL_CONNECTED)
   {
-    firebaseJSON.clear().add("temperature", t).add("humidity", h).add("moisture", m);
 
+    firebaseJSON.clear();
+    firebaseJSON.add("temperature", t);
+    firebaseJSON.add("humidity", h);
+    firebaseJSON.add("moisture", m);
+    // convert to string, unsigned long not supported
+    firebaseJSON.add("epoch", (String)timeClient.getEpochTime());
 
-    if (!Firebase.setJSON(firebaseData, planterPath, firebaseJSON))
+    if (!Firebase.pushJSON(firebaseData, planterPath, firebaseJSON))
     {
       Serial.println("Error Firebase: " + firebaseData.errorReason());
     }
