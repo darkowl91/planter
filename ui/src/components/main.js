@@ -16,27 +16,27 @@ const styles = theme => ({
     },
     paper: {
         padding: theme.spacing(2),
-        margin: `${theme.spacing(1)}px auto`,
+        margin: `${ theme.spacing(1) }px auto`,
         textAlign: 'center',
         color: theme.palette.text.secondary,
-    }
+    },
 })
 
 class Main extends Component {
 
     render() {
-        const { classes } = this.props
+        const {classes} = this.props
 
         return (
             <React.Fragment>
                 <CssBaseline />
-                <div className={classes.root}>
+                <div className={ classes.root }>
                     <Grid container
-                        direction="column"
-                        justify="center"
-                        alignItems="stretch">
+                          direction="column"
+                          justify="center"
+                          alignItems="stretch">
                         <Grid item xs>
-                            <Paper className={classes.paper}>
+                            <Paper className={ classes.paper }>
                                 <Typography variant="h2" gutterBottom>
                                     Temperature
                                 </Typography>
@@ -44,7 +44,7 @@ class Main extends Component {
                             </Paper>
                         </Grid>
                         <Grid item xs>
-                            <Paper className={classes.paper}>
+                            <Paper className={ classes.paper }>
                                 <Typography variant="h2" gutterBottom>
                                     Humidity
                                 </Typography>
@@ -52,7 +52,7 @@ class Main extends Component {
                             </Paper>
                         </Grid>
                         <Grid item xs>
-                            <Paper className={classes.paper}>
+                            <Paper className={ classes.paper }>
                                 <Typography variant="h2" gutterBottom>
                                     Soil Moisture
                                 </Typography>
