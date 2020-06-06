@@ -1,21 +1,44 @@
-import React, { Component } from 'react'
-import { FirebaseDatabaseNode } from "@react-firebase/database"
+import React from 'react'
+import BarChartIcon from '@material-ui/icons/BarChart'
+import { FirebaseDatabaseNode } from '@react-firebase/database'
+
+import Card from './card'
 import Loading from './loading'
+import SimpleLineChart from './simplelineChart'
 
-class Planter extends Component {
 
-    state = {
-        limit: 2000,
-    }
+function Planter() {
 
-    render() {
-        const {theme} = this.props
+    return (
+        <FirebaseDatabaseNode path={ 'planters/planter-1' } orderByKey={ 'yes' } limitToLast={ 25 }>
+            {
+                data => {
+                    if (data.isLoading || !data.value) return <Loading />
 
-        return (
-          <></>
-        )
-    }
+                    const values = Object.values(data.value)
 
+                    return (
+                        <React.Fragment>
+                            <Card label={ 'Moisture' } icon={ <BarChartIcon /> }>
+                                <SimpleLineChart data={ values } dataXAxisKey="epoch"
+                                                 dataYAxisKey="moisture" />
+                            </Card>
+
+                            <Card label={ 'Temperature' } icon={ <BarChartIcon /> }>
+                                <SimpleLineChart data={ values } dataXAxisKey="epoch"
+                                                 dataYAxisKey="temperature" />
+                            </Card>
+
+                            <Card label={ 'Humidity' } icon={ <BarChartIcon /> }>
+                                <SimpleLineChart data={ values } dataXAxisKey="epoch"
+                                                 dataYAxisKey="humidity" />
+                            </Card>
+                        </React.Fragment>
+                    )
+                }
+            }
+        </FirebaseDatabaseNode>
+    )
 }
 
-export default Planter
+export default (Planter)
