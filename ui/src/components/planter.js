@@ -1,12 +1,18 @@
 import React, { Component } from 'react'
-import FirebaseDatabaseNode from '@react-firebase/database'
+import { FirebaseDatabaseNode } from "@react-firebase/database"
+import Loading from './loading'
 
 class Planter extends Component {
 
-    render() {
-        return (
-            <FirebaseDatabaseNode path={ '/planter-1' } />
+    state = {
+        limit: 2000,
+    }
 
+    render() {
+        const {theme} = this.props
+
+        return (
+          <></>
         )
     }
 
