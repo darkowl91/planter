@@ -152,8 +152,8 @@ void setup()
   display.setFont(ArialMT_Plain_10);
   display.flipScreenVertically();
 
-  // sensors update timer every 3s
-  const int sensorsUpdateInterval = 3000;
+  // sensors update timer every 10s
+  const int sensorsUpdateInterval = 10000;
 
   timer.every(sensorsUpdateInterval, updateSensors);
 
