@@ -16,7 +16,9 @@
 #include <FirebaseESP8266.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
-#include <SimpleDHT.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 #include <SSD1306.h>
 #include <timer.h>
 #include <WiFiUdp.h>
@@ -32,12 +34,15 @@ const int ledPin = 14; // D5
 const int btnPin = 12; // D6
 const int dhtPin = 13; // D7
 
+// logging
+bool printSerail = false;
+
 // WIFI
 char ssid[] = SSID;
 char password[] = PASSWORD;
 
-// DHT
-SimpleDHT11 dht11(dhtPin);
+// Climate sensor
+Adafruit_BME280 bme;
 
 // OLED Display
 SSD1306Wire display(0x3c, sdaPin, sclPin);
@@ -51,8 +56,10 @@ long displayLastUpdate = -1;
 // updates timer: sensors refersh, push data to firebae
 Timer<2, millis> timer;
 
-int t;             // temperature
-int h;             // humidity
+float t(NAN);      // temperature
+float h(NAN);      // humidity
+float p(NAN);      // pressure
+
 int m;             // soil moisture
 int m_air = 625;   // air value for soil
 int m_water = 197; // water value for soil
@@ -119,6 +126,12 @@ void drawHumidity()
   display.drawXbm(x + 70, y + 18, img_hum_width, img_hum_height, img_hum_bits);
 }
 
+void drawPressure()
+{
+  drawTitle("Pressure");
+  //  TODO  
+}
+
 void drawSoilMoisture()
 {
   drawTitle("Soil");
@@ -130,7 +143,7 @@ void drawSoilMoisture()
   display.drawXbm(x + 70, y + 18, img_soil_width, img_soil_height, img_soil_bits);
 }
 
-Frame frames[] = {drawTemperature, drawHumidity, drawSoilMoisture};
+Frame frames[] = {drawTemperature, drawHumidity, drawSoilMoisture, drawPressure};
 int frameSize = (sizeof(frames) / sizeof(Frame));
 int frameNum = 0;
 
@@ -138,14 +151,18 @@ void setup()
 {
   Serial.begin(115200);
   delay(10);
-  Serial.println("\nStart excecuting setup...");
-  Serial.print("MAC: ");
-  Serial.println(WiFi.macAddress());
+  log("\nStart excecuting setup...");
+  log("MAC: ");
+  log(WiFi.macAddress());
 
   // set ledPin mode
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin, LOW);
   pinMode(btnPin, INPUT);
+
+  // setup bme280 sensor
+  Wire.begin(sdaPin, sclPin);
+  bme.begin(0x76, &Wire);
 
   // set display
   display.init();
@@ -196,7 +213,7 @@ void updateFrameNum()
     frameNum = 0;
   }
 
-  Serial.println("Update frame -> " + String(frameNum) + " from: " + String(frameSize));
+  log("Update frame -> " + String(frameNum) + " from: " + String(frameSize));
 
   redraw(true);
 }
@@ -210,7 +227,7 @@ bool isBtnPressed()
   if (value == HIGH && btnState == LOW && (millis() - btnPressTime > debounce))
   {
     isPressed = true;
-    Serial.println("Button pressed");
+    log("Button pressed");
     btnPressTime = millis();
   }
 
@@ -242,18 +259,13 @@ void redraw(bool resetLastUpdateTime)
 
 bool updateSensors(void *)
 {
-  byte temperature = 0;
-  byte humidity = 0;
-  int err = SimpleDHTErrSuccess;
-  if ((err = dht11.read(&temperature, &humidity, NULL)) == SimpleDHTErrSuccess)
-  {
-    t = (int)temperature;
-    h = (int)humidity;
-  }
-
-  m = analogRead(moiPin);
-
-  Serial.println("Update sensors -> t: " + String(t) + " h: " + String(h) + " m: " + String(m));
+  // read climate values
+  t = bme.readTemperature();
+  p = bme.readPressure();
+  h = bme.readHumidity();   
+  // translate to moisture percentage
+  m = map(analogRead(moiPin), m_air, m_water, 100, 0);
+  log("Update sensors -> t: " + String(t) + " h: " + String(h) + "p: " + String(p) + " m: " + String(m));
 
   redraw(false);
 
@@ -268,22 +280,23 @@ void connectWiFiAP()
 
   while (WiFi.status() != WL_CONNECTED && attempts < 10)
   {
-    digitalWrite(ledPin, LOW);
-    delay(250);
     digitalWrite(ledPin, HIGH);
     delay(250);
+    digitalWrite(ledPin, LOW);
+    delay(250);
+    
     attempts++;
   }
 
   if (WiFi.status() != WL_CONNECTED)
   {
-    Serial.print("Could not connect to: ");
-    Serial.println(ssid);
+    log("Could not connect to: ");
+    log(ssid);
     return;
   }
 
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+  log("IP address: ");
+  log(WiFi.localIP().toString());
 }
 
 void connectFirebase()
@@ -292,7 +305,7 @@ void connectFirebase()
   Firebase.reconnectWiFi(true);
   if (!Firebase.beginStream(firebaseData, planterPath))
   {
-    Serial.println("Error Firebase: " + firebaseData.errorReason());
+    log("Error Firebase: " + firebaseData.errorReason());
   }
 }
 
@@ -304,13 +317,14 @@ bool udpateFirebaseData(void *)
     firebaseJSON.clear();
     firebaseJSON.add("temperature", t);
     firebaseJSON.add("humidity", h);
+    firebaseJSON.add("pressure", p);
     firebaseJSON.add("moisture", m);
     // convert to string, unsigned long not supported
     firebaseJSON.add("epoch", (String)timeClient.getEpochTime());
 
     if (!Firebase.pushJSON(firebaseData, planterPath, firebaseJSON))
     {
-      Serial.println("Error Firebase: " + firebaseData.errorReason());
+      log("Error Firebase: " + firebaseData.errorReason());
     }
   }
 
@@ -321,4 +335,11 @@ bool blink(void *)
 {
   digitalWrite(ledPin, !digitalRead(ledPin));
   return true;
+}
+
+void log(String str) {
+  if (printSerail)
+  {
+    Serial.println(str);
+  }
 }
