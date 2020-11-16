@@ -19,7 +19,7 @@ function Planter() {
 
                     return (
                         <React.Fragment>
-                            <Card label={ 'Moisture' } icon={ <BarChartIcon /> }>
+                            <Card label={ 'Soil Moisture' } icon={ <BarChartIcon /> }>
                                 <SimpleLineChart data={ values } dataXAxisKey="epoch"
                                                  dataYAxisKey="moisture" />
                             </Card>
@@ -32,6 +32,10 @@ function Planter() {
                             <Card label={ 'Humidity' } icon={ <BarChartIcon /> }>
                                 <SimpleLineChart data={ values } dataXAxisKey="epoch"
                                                  dataYAxisKey="humidity" />
+                            </Card>
+                            <Card label={ 'Pressure' } icon={ <BarChartIcon /> }>
+                                <SimpleLineChart data={ values } dataXAxisKey="epoch"
+                                                 dataYAxisKey="pressure" />
                             </Card>
                         </React.Fragment>
                     )
