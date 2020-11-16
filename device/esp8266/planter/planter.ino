@@ -26,6 +26,8 @@
 #include "Secrets.h"
 #include "Images.h"
 
+#define SEALEVELPRESSURE_HPA (1013.25)
+
 // PIN
 const int moiPin = 0;  // A0
 const int sdaPin = 5;  // D1
@@ -59,10 +61,11 @@ Timer<2, millis> timer;
 float t(NAN);      // temperature
 float h(NAN);      // humidity
 float p(NAN);      // pressure
+float alt(NAN);    // altitude
 
-int m;             // soil moisture
-int m_air = 625;   // air value for soil
-int m_water = 197; // water value for soil
+int m;                   // soil moisture
+const int m_air = 625;   // air value for soil
+const int m_water = 197; // water value for soil
 
 //Firebase
 FirebaseData firebaseData;
@@ -104,7 +107,10 @@ void drawTemperature()
   int x = 15;
   int y = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(x + 15, y + 18, String(t));
+  
+  int value = (int)roundf(t);
+  display.drawString(x + 15, y + 18, String(value));
+
   display.setFont(ArialMT_Plain_10);
   display.drawString(x + 40, y + 18, "O");
   display.setFont(ArialMT_Plain_16);
@@ -119,7 +125,9 @@ void drawHumidity()
   int x = 15;
   int y = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(x + 15, y + 18, String(h));
+
+  int value = (int)roundf(h);
+  display.drawString(x + 15, y + 18, String(value));
 
   display.setFont(ArialMT_Plain_16);
   display.drawString(x + 45, y + 25, "%");
@@ -129,7 +137,17 @@ void drawHumidity()
 void drawPressure()
 {
   drawTitle("Pressure");
-  //  TODO  
+  
+  int x = 15;
+  int y = 15;
+  display.setFont(ArialMT_Plain_24);
+
+  display.drawString(x, y + 18, String(p));
+
+  display.setFont(ArialMT_Plain_16);
+  display.drawString(x + 75, y + 25, "hPa");
+
+  display.drawXbm(x + 90, y + 10, img_pressure_down_width, img_pressure_down_height, img_pressure_down_bits);
 }
 
 void drawSoilMoisture()
@@ -139,7 +157,10 @@ void drawSoilMoisture()
   int x = 15;
   int y = 15;
   display.setFont(ArialMT_Plain_24);
-  display.drawString(x + 15, y + 18, String(m));
+  display.drawString(x + 10, y + 18, String(m));
+
+  display.setFont(ArialMT_Plain_16);
+  display.drawString(x + 50, y + 25, "%");  
   display.drawXbm(x + 70, y + 18, img_soil_width, img_soil_height, img_soil_bits);
 }
 
@@ -261,11 +282,12 @@ bool updateSensors(void *)
 {
   // read climate values
   t = bme.readTemperature();
-  p = bme.readPressure();
-  h = bme.readHumidity();   
+  p = bme.readPressure() / 100.0F;
+  h = bme.readHumidity();
+  alt = bme.readAltitude(SEALEVELPRESSURE_HPA);
   // translate to moisture percentage
-  m = map(analogRead(moiPin), m_air, m_water, 100, 0);
-  log("Update sensors -> t: " + String(t) + " h: " + String(h) + "p: " + String(p) + " m: " + String(m));
+  m = map(analogRead(moiPin), m_water, m_air, 100, 0);
+  log("Update sensors -> t: " + String(t) + " h: " + String(h) + "p: " + String(p) + " m: " + String(m) + " alt: " + String(alt));
 
   redraw(false);
 
@@ -319,6 +341,7 @@ bool udpateFirebaseData(void *)
     firebaseJSON.add("humidity", h);
     firebaseJSON.add("pressure", p);
     firebaseJSON.add("moisture", m);
+    firebaseJSON.add("altitude", alt);
     // convert to string, unsigned long not supported
     firebaseJSON.add("epoch", (String)timeClient.getEpochTime());
 
