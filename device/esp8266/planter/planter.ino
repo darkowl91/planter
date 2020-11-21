@@ -202,7 +202,7 @@ void setup()
   connectFirebase();
 
   // firebase udpdate interval 1h
-  const int firebaseUpdateInterval = 360000;
+  const int firebaseUpdateInterval = 36000000;
 
   timer.every(firebaseUpdateInterval, udpateFirebaseData);
 
@@ -343,7 +343,7 @@ bool udpateFirebaseData(void *)
     firebaseJSON.add("moisture", m);
     firebaseJSON.add("altitude", alt);
     // convert to string, unsigned long not supported
-    firebaseJSON.add("epoch", (String)timeClient.getEpochTime());
+    firebaseJSON.add("epoch", (String)(timeClient.getEpochTime() - 10800));
 
     if (!Firebase.pushJSON(firebaseData, planterPath, firebaseJSON))
     {

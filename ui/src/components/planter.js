@@ -10,7 +10,7 @@ import SimpleLineChart from './simplelineChart'
 function Planter() {
 
     return (
-        <FirebaseDatabaseNode path={ 'planters/planter-1' } orderByKey={ 'yes' } limitToLast={ 25 }>
+        <FirebaseDatabaseNode path={ 'planters/planter-1' } orderByKey={ 'yes' } limitToLast={ 50 }>
             {
                 data => {
                     if (data.isLoading || !data.value) return <Loading />
