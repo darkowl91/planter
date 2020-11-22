@@ -202,7 +202,7 @@ void setup()
   connectFirebase();
 
   // firebase udpdate interval 1h
-  const int firebaseUpdateInterval = 36000000;
+  const int firebaseUpdateInterval = 1 * 60 * 60 * 1000;
 
   timer.every(firebaseUpdateInterval, udpateFirebaseData);
 
