@@ -4,7 +4,7 @@ import { createMuiTheme, ThemeProvider, withStyles } from '@material-ui/core/sty
 import CssBaseline from '@material-ui/core/CssBaseline'
 
 import 'firebase/database';
-import * as firebase from 'firebase/app'
+import firebase from 'firebase/app'
 import { FirebaseDatabaseProvider } from '@react-firebase/database'
 import { firebaseConfig } from './config'
 
