@@ -17,4 +17,5 @@ Smart solution for the home planting, helps to monitor your flower status.
 ## How-To
 Instructables [Planter - Smart Solution for Your Favorite Flower](https://www.instructables.com/id/Planter-Smart-Solution-for-Your-Favorite-Flower/)
 
-![donate](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8PHJET8K5XF6Q&currency_code=USD)
+
+[![paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=8PHJET8K5XF6Q&currency_code=USD)
